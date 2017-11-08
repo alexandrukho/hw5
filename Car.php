@@ -1,98 +1,121 @@
 <?php
-trait Transmission
+/**
+ * Created by PhpStorm.
+ * User: alexandrukho
+ * Date: 08.11.2017
+ * Time: 15:30
+ */
+
+<?php
+
+trait transmission
 {
-    public function transmission($param)
+    function transmission($param)
     {
+        $param = strtolower($param);
         switch ($param) {
-            case "on":
-                echo "transmission status: ON <br>";
-                $res = $this->speed >= 20 ? "gear status: 2" : "gear status 1";
-                echo $res . "<br>";
+            case 'on':
+                if ($this->move_to == 1) {
+                    switch ($this->transmissionType) {
+                        case '1':
+                            echo "transmission: on<br>";
+                            if ($this->speed <= 20 && $this->speed > 0) {
+                                echo "gear 1: on<br>";
+                            } elseif ($this->speed > 20) {
+                                echo "gear 2: on<br>";
+                            }
+                            break;
+                        case '2':
+                            echo "auto transmission: on<br>";
+                            break;
+                    }
+                } elseif ($this->move_to == 2) {
+                    echo "backward gear: on<br>";
+                }
                 break;
-            case "backward":
-                echo "transmission turn BACKWARD <br>";
+            case 'off':
+                echo "transmission: off<br>";
                 break;
-            case "off":
-                $res = "transmission status OFF <br>";
-                echo $res;
         }
     }
 }
 
 class Car
 {
-    use Transmission;
-    protected $engine_power;
-    private $distance;
+    use transmission;
+    protected $power;
+    protected $transmissionType;
+
     private $speed;
+    private $distance;
     private $move_to;
-    public function __construct($engine_power)
-    {
-        $this->engine_power = $engine_power;
-    }
 
     public function move($distance, $speed, $move_to)
     {
-        $move_to = ($move_to === 1 ? "move" : "backward");
         $this->distance = $distance;
         $this->speed = $speed;
         $this->move_to = $move_to;
-        //move car
-        $this->engine("on");
-        $this->transmission("on");
+        $this->engine('on');
+        $this->transmission('on');
+        $move_to = ($move_to == 1 ? 'move' : 'reverse');
         $this->engine($move_to, $this->distance, $this->speed);
-        $this->transmission("off");
-        $this->engine("off");
+        $this->transmission('off');
+        $this->engine('off');
     }
 
     protected function engine($status, $distance = null, $speed = null)
     {
-        ($this->engine_power * 2 < $speed ? $speed = $this->engine_power * 2 : null);
+        if (($this->power * 2) < $speed) {
+            $speed = $this->power * 2;        //определение скорости в зависмости от мощности
+        }
         $status = strtolower($status);
         switch ($status) {
-            case "on":
-                echo "engine status: ON<br>";
+            case 'on':
+                echo "engine: on<br>";
                 break;
-            case "move":
+            case 'move':
                 $temperature = 0;
                 for ($path = 0; $path < $distance; $path += 10) {
                     $temperature += 5;
-                    if ($temperature == 90) {
+                    if ($temperature === 90) {
                         $temperature = $this->cooler($temperature);
                     }
                 }
                 break;
-            case "off":
-                echo "engine status: OFF <br>";
+            case "reverse":
+                break;
+            case 'off':
+                echo "engine: off<br>";
                 break;
         }
     }
 
-    protected function cooler($tepmerature)
+    protected function cooler($temperature)
     {
-        $tepmerature -= 10;
-        return $tepmerature;
+        $temperature -= 10;
+        return $temperature;
     }
 }
 
-class Opel extends Car
+final class Niva extends Car
 {
-    public function __construct($engine_power)
+    function __construct($power)
     {
-        parent::__construct($engine_power);
+        $this->power = $power;
+        $this->transmissionType = 1;
     }
 }
 
-class Honda extends Car
+final class Lamborgini extends Car
 {
-    public function __construct($engine_power)
+    function __construct($power)
     {
-        parent::__construct($engine_power);
+        $this->power = $power;
+        $this->transmissionType = 2;
     }
 }
-
-$opel = new Opel(10);
-$honda = new Honda(20);
-$opel->move(500, 50, 1);
-echo "<hr>";
-$honda->move(300, 10, 1);
+$car1 = new Niva (10); //параметры (мощность)
+$car1->move(300,150, 1); // параметры (дистанция, скорость, направление) 1 - вперед. 2 - назад
+echo '<br>';
+$car2 = new Lamborgini(100);
+$car2->move(600, 50, 1);
