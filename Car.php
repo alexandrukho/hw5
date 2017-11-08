@@ -1,13 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: alexandrukho
- * Date: 08.11.2017
- * Time: 15:30
- */
-
-<?php
-
 trait transmission
 {
     function transmission($param)
